@@ -31,6 +31,8 @@ def load(organism, dstamp):
     testannotfname = "colombos_%s_testannot_%s.txt" %(organism, dstamp)
 
     # Download data if necessary.
+    if not os.path.exists("data"):
+        os.makedirs("data")
     if not os.path.isfile("data/%s" %(zipfname)):
         print("Downloading %s data..." %(organism))
         urllib.urlretrieve("%s/%s" %(source, zipfname), "data/%s" %(zipfname))
