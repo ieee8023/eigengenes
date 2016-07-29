@@ -1,9 +1,8 @@
 import load_data
-import matplotlib.font_manager as font_manager
-import numpy.linalg as linalg
+import matplotlib.font_manager
+import numpy
 import pylab
 import sys
-from sklearn.decomposition import PCA
 
 def main(args):
     """ Performs principal component analysis (PCA) on colombos data. """
@@ -14,40 +13,43 @@ def main(args):
     tolerence = float(args[1])
     X = load_data.load(organism, False)[0].transpose()
     m, n = X.shape
-    K, Y1, Y2 = [], [], []
+    Xmean = numpy.mean(X, axis = 0)
+    Xstd = numpy.std(X, axis = 0)
+    X = numpy.nan_to_num((X - Xmean) / Xstd)
+    K, L, J = [], [], []
     print("Running PCA...")
-    for k in range(5, n + 1, 5):
-        pca = PCA(n_components = k, whiten = True)
-        pca.fit(X)
-        var_explained = sum(pca.explained_variance_ratio_)
-        projections = pca.transform(X)
-        reconstruction = pca.inverse_transform(projections)
+    U, S, V = numpy.linalg.svd(X)
+    explained_variance = (S ** 2) / m
+    explained_variance_ratio = explained_variance / sum(explained_variance)
+    for k, v in enumerate(S):
+        print("  First %d components of %d..." %(k + 1, len(S)))
+        l = v ** 2
+        projection = numpy.dot(X, V[:k + 1].T)
+        reconstruction = numpy.dot(projection, V[:k + 1])
         residual = X - reconstruction
-        error = linalg.norm(residual)
-        K.append(k)
-        Y1.append(var_explained)
-        Y2.append(error)
-        print("  n_components = %d, var_explained = %f, error = %f" \
-              %(k, round(var_explained, 3), round(error, 3)))
-        if var_explained > 1 - tolerence:
+        error = sum(numpy.linalg.norm(residual, axis = 0) ** 2) / (2 * m)
+        K.append(k + 1)
+        L.append(l)
+        J.append(error)
+        if 1 - sum(explained_variance_ratio[:k + 1]) < tolerence:
             break
-
-    font_prop = font_manager.FontProperties(size = 12)
+    font_prop = matplotlib.font_manager.FontProperties(size = 12)
     pylab.figure(1, figsize = (12, 9), dpi = 500)
 
     pylab.subplot(2, 1, 1)
     pylab.grid(True)
-    pylab.xlabel(r"# of principal components", fontproperties = font_prop)
-    pylab.ylabel(r"% variance explained", fontproperties = font_prop)
-    pylab.plot(K, Y1, "k-", linewidth = 2, alpha = 0.6)
+    pylab.xlabel(r"# of components $k$", fontproperties = font_prop)
+    pylab.ylabel(r"eigenvalue $\lambda$", fontproperties = font_prop)
+    pylab.plot(K, L, "b-", linewidth = 2, alpha = 0.6)
+    pylab.plot(K, L, "r.", linewidth = 2, alpha = 0.6)
     pylab.xlim(min(K), max(K))
-    pylab.ylim(0, 1)
 
     pylab.subplot(2, 1, 2)
     pylab.grid(True)
-    pylab.xlabel(r"# of principal components", fontproperties = font_prop)
-    pylab.ylabel(r"reconstruction error", fontproperties = font_prop)
-    pylab.plot(K, Y2, "k-", linewidth = 2, alpha = 0.6)
+    pylab.xlabel(r"# of components $k$", fontproperties = font_prop)
+    pylab.ylabel(r"reconstruction error $J$", fontproperties = font_prop)
+    pylab.plot(K, J, "b-", linewidth = 2, alpha = 0.6)
+    pylab.plot(K, J, "r.", linewidth = 2, alpha = 0.6)
     pylab.xlim(min(K), max(K))
 
     pylab.savefig("%s.pdf" %(organism), format = "pdf", bbox_inches = "tight")
