@@ -1,5 +1,5 @@
 import load_data
-import matplotlib.font_manager
+import matplotlib
 import numpy
 import pylab
 import sys
