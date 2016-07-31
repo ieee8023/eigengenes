@@ -14,11 +14,11 @@ def load(organism, shared = True):
     data for subsequent analysis. 
 
     Returns:
-      expressions - M by N matrix, where M is the number of genes and N is
-                    the number of contrasts. The matrix is/isn't Theano shared
+      expressions - M by N matrix, where M is the number of contrasts and N is
+                    the number of genes. The matrix is/isn't Theano shared
                     if shared is True/False.
-      genes       - a list of M gene names.
-      contrasts   - a list of N contrast identifiers.
+      contrasts   - a list of M contrast identifiers.
+      genes       - a list of N gene names.
       refannot    - a dictionary mapping contrast identifiers to a set of 
                     reference conditions.
       testannot   - a dictionary mapping contrast identifiers to a set of 
@@ -66,130 +66,136 @@ def load(organism, shared = True):
         testannot.setdefault(contrast, set())
         testannot[contrast].add(annot)
 
+    # Transpose and standardize expressions.
+    expressions = expressions.T
+    expressions_mean = numpy.mean(expressions, axis = 0)
+    expressions_std = numpy.std(expressions, axis = 0)
+    expressions = (expressions - expressions_mean) / expressions_std
+    expressions = numpy.nan_to_num(expressions)
+
     # Remove extracted files.
     os.remove(expfname)
     os.remove(refannotfname)
     os.remove(testannotfname)
 
     if shared:
-        return theano.shared(expressions, borrow = True), \
+        return theano.shared(numpy.asarray(expressions, 
+                                           dtype = theano.config.floatX), 
+                             borrow = True), \
             genes, contrasts, refannot, testannot
-    return expressions, genes, contrasts, refannot, testannot
+    return expressions, contrasts, genes, refannot, testannot
 
 def ecoli(shared):
-    """ Escherichia coli (4321 genes and 4077 contrasts). """
+    """ Escherichia coli (4077 x 4321). """
 
     return load("ecoli", shared)
 
 def bsubt(shared):
-    """ Bacillus subtilis (4176 genes and 1259 contrasts). """
+    """ Bacillus subtilis (1259 x 4176). """
 
     return load("bsubt", shared)
 
 def scoel(shared):
-    """ Streptomyces coelicolor (8239 genes and 371 contrasts). """
+    """ Streptomyces coelicolor (371 x 8239). """
     
     return load("scoel", shared)
 
 def paeru(shared):
-    """ Pseudomonas aeruginosa (5647 genes and 559 contrasts). """
+    """ Pseudomonas aeruginosa (559 x 5647). """
 
     return load("paeru", shared)
 
 def mtube(shared):
-    """ Mycobacterium tuberculosis (4068 genes and 1098 contrasts). """
+    """ Mycobacterium tuberculosis (1098 x 4068). """
 
     return load("mtube", shared)
 
 def hpylo(shared):
-    """ Helicobacter pylori (1616 genes and 133 contrasts). """
+    """ Helicobacter pylori (133 x 1616). """
 
     return load("hpylo", shared)
 
 def meta_sente(shared):
-    """ Salmonella enterica (cross-strain) (6261 genes and 1066 contrasts). """
+    """ Salmonella enterica (cross-strain) (1066 x 6261). """
 
     return load("meta_sente", shared)
 
 def sente_lt2(shared):
-    """ Salmonella enterica serovar Typhimurium LT2 (4556 genes and 172 
-    contrasts). """
+    """ Salmonella enterica serovar Typhimurium LT2 (172 x 4556). """
 
     return load("sente_lt2", shared)
 
 def sente_14028s(shared):
-    """ Salmonella enterica serovar Typhimurium 14028S (5416 genes and 681 
-    contrasts). """
+    """ Salmonella enterica serovar Typhimurium 14028S (681 x 5416). """
 
     return load("sente_14028s", shared)
 
 def sente_sl1344(shared):
-    """ Salmonella enterica serovar Typhimurium SL1344 (4655 genes and 213 
-    contrasts). """
+    """ Salmonella enterica serovar Typhimurium SL1344 (213 x 4655). """
 
     return load("sente_sl1344", shared)
 
 def smeli_1021(shared):
-    """ Sinorhizobium meliloti (6218 genes and 424 contrasts). """
+    """ Sinorhizobium meliloti (424 x 6218). """
 
     return load("smeli_1021", shared)
 
 def cacet(shared):
-    """ Clostridium acetobutylicum (3778 genes and 377 contrasts). """
+    """ Clostridium acetobutylicum (377 x 3778). """
 
     return load("cacet", shared)
 
 def tther(shared):
-    """ Thermus thermophilus (2173 genes and 444 contrasts). """
+    """ Thermus thermophilus (444 x 2173). """
 
     return load("tther", shared)
 
 def banth(shared):
-    """ Bacillus anthracis (5039 genes and 66 contrasts). """
+    """ Bacillus anthracis (66 x 5039). """
 
     return load("banth", shared)
 
 def bcere(shared):
-    """ Bacillus cereus (5231 genes and 283 contrasts). """
+    """ Bacillus cereus (283 x 5231). """
 
     return load("bcere", shared)
 
 def bthet(shared):
-    """ Bacteroides thetaiotaomicron (4816 genes and 333 contrasts). """
+    """ Bacteroides thetaiotaomicron (333 x 4816). """
 
     return load("bthet", shared)
 
 def cjeju(shared):
-    """ Campylobacter jejuni (1572 genes and 152 contrasts). """
+    """ Campylobacter jejuni (152 x 1572). """
 
     return load("cjeju", shared)
 
 def lrham(shared):
-    """ Lactobacillus rhamnosus (2834 genes and 79 contrasts). """
+    """ Lactobacillus rhamnosus (79 x 2834). """
 
     return load("lrham", shared)
 
 def mmari(shared):
-    """ Methanococcus maripaludis (1722 genes and 364 contrasts). """
+    """ Methanococcus maripaludis (364 x 1722). """
 
     return load("mmari", shared)
 
 def sflex(shared):
-    """ Shigella flexneri (4315 genes and 35 contrasts). """
+    """ Shigella flexneri (35 x 4315). """
 
     return load("sflex", shared)
 
 def spneu(shared):
-    """ Streptococcus pneumoniae (1914 genes and 68 contrasts). """
+    """ Streptococcus pneumoniae (68 x 1914). """
 
     return load("spneu", shared)
 
 def ypest(shared):
-    """ Yersinia pestis (3979 genes and 36 contrasts). """
+    """ Yersinia pestis (36 x 3979). """
 
     return load("ypest", shared)
 
 def meta_ally2(shared):
-    """ Cross-species analysis (31982 genes and 11224 contrasts). """
+    """ Cross-species analysis (11224 x 31982). """
 
     return load("meta_ally2", shared)
