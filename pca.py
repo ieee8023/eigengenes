@@ -11,26 +11,24 @@ def main(args):
         sys.exit("Usage: python pca.py <organism> <tolerence>")
     organism = args[0]
     tolerence = float(args[1])
-    X = load_data.load(organism, False)[0].transpose()
+    X = load_data.load(organism, False)[0]
     m, n = X.shape
-    Xmean = numpy.mean(X, axis = 0)
-    Xstd = numpy.std(X, axis = 0)
-    X = numpy.nan_to_num((X - Xmean) / Xstd)
     K, L, J = [], [], []
     print("Running PCA...")
     U, S, V = numpy.linalg.svd(X)
     explained_variance = (S ** 2) / m
     explained_variance_ratio = explained_variance / sum(explained_variance)
     for k, v in enumerate(S):
-        print("  First %d components of %d..." %(k + 1, len(S)))
         l = v ** 2
         projection = numpy.dot(X, V[:k + 1].T)
         reconstruction = numpy.dot(projection, V[:k + 1])
         residual = X - reconstruction
-        error = sum(numpy.linalg.norm(residual, axis = 0) ** 2) / (2 * m)
+        error = numpy.mean(numpy.linalg.norm(residual, axis = 1))
         K.append(k + 1)
         L.append(l)
         J.append(error)
+        print("  First %d components of %d, explained ratio = %.3f" \
+              %(k + 1, len(S), sum(explained_variance_ratio[:k + 1])))
         if 1 - sum(explained_variance_ratio[:k + 1]) < tolerence:
             break
     font_prop = matplotlib.font_manager.FontProperties(size = 12)
