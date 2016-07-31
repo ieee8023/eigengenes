@@ -23,7 +23,7 @@ def main(args):
         projection = numpy.dot(X, V[:k + 1].T)
         reconstruction = numpy.dot(projection, V[:k + 1])
         residual = X - reconstruction
-        error = numpy.mean(numpy.linalg.norm(residual, axis = 1))
+        error = numpy.mean(numpy.linalg.norm(residual, axis = 1) ** 2)
         K.append(k + 1)
         L.append(l)
         J.append(error)
