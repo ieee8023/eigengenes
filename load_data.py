@@ -82,7 +82,7 @@ def load(organism, shared = True):
         return theano.shared(numpy.asarray(expressions, 
                                            dtype = theano.config.floatX), 
                              borrow = True), \
-            genes, contrasts, refannot, testannot
+                             contrasts, genes, refannot, testannot
     return expressions, contrasts, genes, refannot, testannot
 
 def ecoli(shared):
