@@ -35,10 +35,10 @@ def load(organism, shared = True):
         print("Downloading %s data..." %(organism))
         urllib.urlretrieve("%s/%s" %(source, zipfname), "data/%s" %(zipfname))
 
-    # Extract data.
-    fh = zipfile.ZipFile("data/%s" %(zipfname))
-    fh.extractall("data")
-    fh.close()
+        # Extract data.
+        fh = zipfile.ZipFile("data/%s" %(zipfname))
+        fh.extractall("data")
+        fh.close()
 
     # Prepare data for later processing.
     print("Preparing %s data..." %(organism))
@@ -46,6 +46,7 @@ def load(organism, shared = True):
     refannotfname = glob.glob("data/colombos_%s_refannot_*.txt" %(organism))[0]
     testannotfname = glob.glob("data/colombos_%s_testannot_*.txt" 
                                %(organism))[0]
+        
     df = pandas.read_table(expfname, skiprows = 5, header = 1)
     df = df.fillna(0.0)
     genes = df["Gene name"].values
@@ -74,9 +75,9 @@ def load(organism, shared = True):
     expressions = numpy.nan_to_num(expressions)
 
     # Remove extracted files.
-    os.remove(expfname)
-    os.remove(refannotfname)
-    os.remove(testannotfname)
+#    os.remove(expfname)
+#    os.remove(refannotfname)
+#    os.remove(testannotfname)
 
     if shared:
         return theano.shared(numpy.asarray(expressions, 
